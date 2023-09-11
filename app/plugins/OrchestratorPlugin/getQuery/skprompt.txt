@@ -1,0 +1,9 @@
+{{$history}}
+User: {{$input}}
+
+---------------------------------------------
+
+If the user is asking about a company or organization, return only the organization name.
+Otherwise, return "None".
+
+Organization name:

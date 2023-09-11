@@ -1,0 +1,8 @@
+The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.
+The assistant answers the user's question based on the provided context.
+Supporting information:
+{{$context}}
+
+Assistant: What can I help you with?
+User: {{$input}}
+Assistant:
