@@ -1,8 +1,11 @@
+Provide ONLY the intent of the user. The intent should be one of the following: AccountQuery, Other
+
+Example:
+User: Who is the App Inno TS for Contoso?
+INTENT: AccountQuery
+
+User: Hello, how are you?
+INTENT: Other
+
 {{$history}}
-User: {{$input}}
-
----------------------------------------------
-
-Provide ONLY the intent of the user. The intent should be one of the following: {{$options}}
-
 INTENT:

@@ -1,9 +1,9 @@
-{{$history}}
-User: {{$input}}
-
----------------------------------------------
-
 If the user is asking about a company or organization, return only the organization name.
 Otherwise, return "None".
 
+Example:
+User: Who is the Account Executive for Contoso?
+Organization name: Contoso
+
+{{$history}}
 Organization name:

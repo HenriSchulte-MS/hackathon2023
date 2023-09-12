@@ -3,23 +3,18 @@
      "type": "completion",
      "description": "Extracts the relevant organization from the user's request and returns a response.",
      "completion": {
-          "max_tokens": 100,
-          "temperature": 0.0,
-          "top_p": 0.0,
-          "presence_penalty": 0.0,
-          "frequency_penalty": 0.0,
+          "max_tokens": 10,
+          "temperature": 0,
+          "top_p": 0,
+          "presence_penalty": 0,
+          "frequency_penalty": 0,
           "stop_sequences": ["\n"]
      },
      "input": {
           "parameters": [
                {
-                    "name": "input",
-                    "description": "The user's request.",
-                    "defaultValue": ""
-               },
-               {
                     "name": "history",
-                    "description": "The history of the conversation.",
+                    "description": "The history of the conversation, including the most recent user input.",
                     "defaultValue": ""
                }
           ]

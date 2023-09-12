@@ -3,3 +3,4 @@ azure-identity
 azure-keyvault-secrets
 azure-search-documents
 azure-core
+flask
