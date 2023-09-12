@@ -1,9 +1,14 @@
-If the user is asking about a company or organization, return only the organization name.
+Return the last company or organization that the user mentioned. Return only the organization name.
 Otherwise, return "None".
 
 Example:
 User: Who is the Account Executive for Contoso?
-Organization name: Contoso
+ORGANIZATION NAME: Contoso
+
+User: What is the ID for Contoso?
+Assistant: The ID for Contoso is 12345.
+User: Are there any opportunities for them?
+ORGANIZATION NAME: Contoso
 
 {{$history}}
-Organization name:
+ORGANIZATION NAME:

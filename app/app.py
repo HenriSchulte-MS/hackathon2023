@@ -131,7 +131,7 @@ def chat():
                 answer_context = search_accounts(account_name)
             except Exception as e:
                 logging.error(e)
-                answer_context = "No accounts found for the user input. Ask to rephrase their question."
+                answer_context = f"The application looked for accounts named '{account_name}' but none were found."
         else:
             # If user is asking about opportunity, search information in CRM
             try:
@@ -140,7 +140,7 @@ def chat():
                 answer_context = "Opportunities:\n" + opportunities
             except Exception as e:
                 logging.error(e)
-                answer_context = "No opportunities found for the user input. Ask to rephrase their question."
+                answer_context = f"The application looked for opportunities for accounts named '{account_name}' but none were found."
 
     # Generate answer
     messages = generate_answer(ask, messages, answer_context)
