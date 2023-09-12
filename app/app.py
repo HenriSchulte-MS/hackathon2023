@@ -1,6 +1,7 @@
 import semantic_kernel as sk
 from semantic_kernel.connectors.ai.open_ai import AzureTextCompletion
 from plugins.SearchPlugin import SearchPlugin
+from plugins.MSSalesPlugin import MSSalesPlugin
 from keyvault import KeyVault
 from flask import Flask, render_template, request
 import logging
@@ -33,6 +34,20 @@ def search_accounts(query: str) -> str:
     search_result = search_plugin["getAccount"].invoke(query)
     logging.info(f"Search result: {search_result.result}")
     return search_result.result
+
+
+def get_account_id(account_name: str) -> str:
+    logging.info(f"Getting account ID for {account_name} from MSSales...")
+    account_id = mssales_plugin["getAccountID"].invoke(account_name)
+    logging.info(f"Account ID: {account_id}")
+    return account_id.result
+
+
+def get_opportunities(account_id: str) -> str:
+    logging.info(f"Getting opportunities for account ID {account_id} from MSSales...")
+    opportunities = mssales_plugin["getOpportunities"].invoke(account_id)
+    logging.info(f"Opportunities: {opportunities.result}")
+    return opportunities.result
 
 
 def generate_answer(user_input: str, messages: dict, context: str = "") -> dict:
@@ -75,6 +90,7 @@ kernel.add_chat_service("chat", AzureTextCompletion(aoai_deployment, openai_endp
 # Register plugins
 logging.info("Registering plugins...")
 search_plugin = kernel.import_skill(SearchPlugin(), skill_name="search_plugin")
+mssales_plugin = kernel.import_skill(MSSalesPlugin(), skill_name="mssales_plugin")
 answer_plugin = kernel.import_semantic_skill_from_directory("plugins", "AnswerPlugin")
 orchestrator_plugin = kernel.import_semantic_skill_from_directory("plugins", "OrchestratorPlugin")
 
@@ -101,17 +117,30 @@ def chat():
     intent_result = detect_intent(messages)
 
     answer_context = ""
-    if intent_result == "AccountQuery":
+
+    # If user is asking question about account or opportunity
+    if intent_result in ["AccountQuery", "OpportunityQuery"]:
 
         # Extract organization name to use as search query
-        query = extract_account(messages)
+        account_name = extract_account(messages)
 
-        # Search for the account
-        try:
-            answer_context = search_accounts(query)
-        except Exception as e:
-            logging.error(e)
-            answer_context = "No accounts found for the user input. Ask to rephrase their question."
+        # If user is asking about account, search information in search index
+        if intent_result == "AccountQuery":
+            # Search for the account assignments
+            try:
+                answer_context = search_accounts(account_name)
+            except Exception as e:
+                logging.error(e)
+                answer_context = "No accounts found for the user input. Ask to rephrase their question."
+        else:
+            # If user is asking about opportunity, search information in CRM
+            try:
+                account_id = get_account_id(account_name)
+                opportunities = get_opportunities(account_id)
+                answer_context = "Opportunities:\n" + opportunities
+            except Exception as e:
+                logging.error(e)
+                answer_context = "No opportunities found for the user input. Ask to rephrase their question."
 
     # Generate answer
     messages = generate_answer(ask, messages, answer_context)

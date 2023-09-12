@@ -1,8 +1,11 @@
-Provide ONLY the intent of the user. The intent should be one of the following: AccountQuery, Other
+Provide ONLY the intent of the user. The intent should be one of the following: AccountQuery, OpportunityQuery, Other
 
 Example:
 User: Who is the App Inno TS for Contoso?
 INTENT: AccountQuery
+
+User: What are my opportunities with Contoso?
+INTENT: OpportunityQuery
 
 User: Hello, how are you?
 INTENT: Other
