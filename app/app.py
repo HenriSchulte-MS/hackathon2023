@@ -107,7 +107,11 @@ def chat():
         query = extract_account(messages)
 
         # Search for the account
-        answer_context = search_accounts(query)
+        try:
+            answer_context = search_accounts(query)
+        except Exception as e:
+            logging.error(e)
+            answer_context = "No accounts found for the user input. Ask to rephrase their question."
 
     # Generate answer
     messages = generate_answer(ask, messages, answer_context)
