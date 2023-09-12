@@ -1,17 +1,28 @@
 import semantic_kernel as sk
 from semantic_kernel.connectors.ai.open_ai import AzureTextCompletion
-from semantic_kernel.planning.sequential_planner import SequentialPlanner
 from plugins.SearchPlugin import SearchPlugin
+from keyvault import KeyVault
 
 
 async def main():
 
+    # Key vault secrets names
+    OPENAI_KEY_NAME = 'AzureOAIKey'
+    OPENAI_ENDPOINT_NAME = 'AzureOAIEndpoint'
+
+    keyvault = KeyVault()
+
+    # Get key vault secrets
+    openai_key = keyvault.get_secret(OPENAI_KEY_NAME)
+    openai_endpoint = keyvault.get_secret(OPENAI_ENDPOINT_NAME)
+    
+
     # Instantiate your kernel
     kernel = sk.Kernel()
 
-    # Prepare Azure OpenAI service using credentials stored in the `.env` file
-    deployment, api_key, endpoint = sk.azure_openai_settings_from_dot_env()
-    kernel.add_chat_service("chat", AzureTextCompletion(deployment, endpoint, api_key))
+    # Prepare Azure OpenAI service
+    aoai_deployment = 'gpt-35-turbo'
+    kernel.add_chat_service("chat", AzureTextCompletion(aoai_deployment, openai_endpoint, openai_key))
 
     # Register plugins
     search_plugin = kernel.import_skill(SearchPlugin(), skill_name="search_plugin")

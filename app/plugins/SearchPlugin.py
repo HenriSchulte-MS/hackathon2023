@@ -1,19 +1,22 @@
 from semantic_kernel.skill_definition import sk_function
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
-from dotenv import load_dotenv
-import os
+from keyvault import KeyVault
 
 class SearchPlugin:
 
-    # Load environment
-    load_dotenv()
+    # Get secrets from keyvault
+    keyvault = KeyVault()
+    SEARCH_ENDPOINT_NAME = 'CogSearchEndpoint'
+    SEARCH_KEY_NAME = 'CogSearchKey'
+    search_endpoint = keyvault.get_secret(SEARCH_ENDPOINT_NAME)
+    search_key = keyvault.get_secret(SEARCH_KEY_NAME)
 
     # Create Cognitive Search client with configuration from .env file
     search_client = SearchClient(
-        endpoint=os.getenv("AZURE_COGNITIVE_SEARCH_ENDPOINT"),
-        index_name=os.getenv("AZURE_COGNITIVE_SEARCH_INDEX_NAME"),
-        credential=AzureKeyCredential(os.getenv("AZURE_COGNITIVE_SEARCH_API_KEY")),
+        endpoint=search_endpoint,
+        index_name='mal-idx',
+        credential=AzureKeyCredential(search_key)
     )
     
     @sk_function(
