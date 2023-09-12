@@ -10,21 +10,18 @@ def get_message_history(messages):
     return "\n".join([f"{m['role']}: {m['content']}" for m in messages])
 
 
-def detect_intent(user_input: str) -> str:
+def detect_intent(messages: dict) -> str:
     logging.info("Detecting intent...")
     intent_vars = sk.ContextVariables()
-    intent_vars["input"] = user_input
-    intent_vars["options"] = "AccountQuery, Other"
     intent_vars["history"] = get_message_history(messages)
     intent = orchestrator_plugin["getIntent"].invoke(variables=intent_vars)
-    intent_result = intent.result.strip()
+    intent_result = intent.result.replace("<|im_end|>", "").strip()
     logging.info(f"Intent: {intent_result}")
     return intent_result
 
 
-def extract_account(user_input: str) -> str:
+def extract_account(messages: dict) -> str:
     query_vars = sk.ContextVariables()
-    query_vars["input"] = user_input
     query_vars["history"] = get_message_history(messages)
     query = orchestrator_plugin["getQuery"].invoke(variables=query_vars)
     query_clean = query.result.replace("<|im_end|>", "").strip()
@@ -38,7 +35,7 @@ def search_accounts(query: str) -> str:
     return search_result.result
 
 
-def generate_answer(user_input: str, context: str = "") -> str:
+def generate_answer(user_input: str, messages: dict, context: str = "") -> dict:
     answer_vars = sk.ContextVariables()
     answer_vars["input"] = user_input
     answer_vars["context"] = context
@@ -47,6 +44,7 @@ def generate_answer(user_input: str, context: str = "") -> str:
     answer = answer.result.strip()
     messages.append({'role': 'assistant', 'content': answer})
     logging.info(f"Assistant: {answer}")
+    return messages
 
 
 # Create Flask app
@@ -95,27 +93,24 @@ def chat():
     
     # Get user input from web form
     ask = request.form['message']
+    global messages
     messages.append({'role': 'user', 'content': ask})
     logging.info(f"User: {ask}")
 
     # Detect user intent
-    intent_result = detect_intent(ask)
+    intent_result = detect_intent(messages)
 
+    answer_context = ""
     if intent_result == "AccountQuery":
 
         # Extract organization name to use as search query
-        query = extract_account(ask)
+        query = extract_account(messages)
 
         # Search for the account
-        search_result = search_accounts(query)
+        answer_context = search_accounts(query)
 
-        # Generate answer
-        answer = generate_answer(ask, search_result)
-
-    else:
-        
-        # Generate answer
-        answer = generate_answer(ask)
+    # Generate answer
+    messages = generate_answer(ask, messages, answer_context)
 
     return render_template('index.html', messages=messages)
 

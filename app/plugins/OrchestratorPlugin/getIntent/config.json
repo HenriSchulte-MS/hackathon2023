@@ -4,27 +4,27 @@
      "description": "Gets the intent of the user.",
      "completion": {
           "max_tokens": 10,
-          "temperature": 0.0,
-          "top_p": 0.0,
-          "presence_penalty": 0.0,
-          "frequency_penalty": 0.0,
+          "temperature": 0,
+          "top_p": 0,
+          "presence_penalty": 0,
+          "frequency_penalty": 0,
           "stop_sequences": ["\n"]
      },
      "input": {
           "parameters": [
                {
-                    "name": "input",
-                    "description": "The user's request.",
-                    "defaultValue": ""
-               },
-               {
                     "name": "history",
-                    "description": "The history of the conversation.",
+                    "description": "The history of the conversation, incl. the most revent user input.",
                     "defaultValue": ""
                },
                {
                     "name": "options",
                     "description": "The options to choose from.",
+                    "defaultValue": ""
+               },
+               {
+                    "name": "option_descriptions",
+                    "description": "Descriptions for the options.",
                     "defaultValue": ""
                }
           ]
