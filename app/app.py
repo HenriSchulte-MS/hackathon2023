@@ -26,7 +26,7 @@ def extract_account(messages: dict) -> str:
     query_vars["history"] = get_message_history(messages)
     query = orchestrator_plugin["getQuery"].invoke(variables=query_vars)
     query_clean = query.result.replace("<|im_end|>", "").strip()
-    logging.info(f"Searching accounts for '{query_clean}'...")
+    logging.info(f"Found account: '{query_clean}'...")
     return query_clean
 
 
