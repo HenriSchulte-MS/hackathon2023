@@ -4,6 +4,10 @@ from plugins.SearchPlugin import SearchPlugin
 from keyvault import KeyVault
 from flask import Flask, render_template, request
 
+def get_message_history(messages):
+    # join messages with line breaks into one string
+    return "\n".join([f"{m['role']}: {m['content']}" for m in messages])
+
 # Create Flask app
 app = Flask(__name__)
 
@@ -49,13 +53,17 @@ def chat():
     intent_vars = sk.ContextVariables()
     intent_vars["input"] = ask
     intent_vars["options"] = "AccountQuery, Other"
+    intent_vars["history"] = get_message_history(messages)
     intent = orchestrator_plugin["getIntent"].invoke(variables=intent_vars)
     intent_result = intent.result.strip()
 
     if intent_result == "AccountQuery":
 
         # Extract organization name to use as search query
-        query = orchestrator_plugin["getQuery"].invoke(ask)
+        query_vars = sk.ContextVariables()
+        query_vars["input"] = ask
+        query_vars["history"] = get_message_history(messages)
+        query = orchestrator_plugin["getQuery"].invoke(variables=query_vars)
         query_clean = query.result.replace("<|im_end|>", "").strip()
         #print(f"Query: {query_clean}")
 
