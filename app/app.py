@@ -9,6 +9,46 @@ def get_message_history(messages):
     # join messages with line breaks into one string
     return "\n".join([f"{m['role']}: {m['content']}" for m in messages])
 
+
+def detect_intent(user_input: str) -> str:
+    logging.info("Detecting intent...")
+    intent_vars = sk.ContextVariables()
+    intent_vars["input"] = user_input
+    intent_vars["options"] = "AccountQuery, Other"
+    intent_vars["history"] = get_message_history(messages)
+    intent = orchestrator_plugin["getIntent"].invoke(variables=intent_vars)
+    intent_result = intent.result.strip()
+    logging.info(f"Intent: {intent_result}")
+    return intent_result
+
+
+def extract_account(user_input: str) -> str:
+    query_vars = sk.ContextVariables()
+    query_vars["input"] = user_input
+    query_vars["history"] = get_message_history(messages)
+    query = orchestrator_plugin["getQuery"].invoke(variables=query_vars)
+    query_clean = query.result.replace("<|im_end|>", "").strip()
+    logging.info(f"Searching accounts for '{query_clean}'...")
+    return query_clean
+
+
+def search_accounts(query: str) -> str:
+    search_result = search_plugin["getAccount"].invoke(query)
+    logging.info(f"Search result: {search_result.result}")
+    return search_result.result
+
+
+def generate_answer(user_input: str, context: str = "") -> str:
+    answer_vars = sk.ContextVariables()
+    answer_vars["input"] = user_input
+    answer_vars["context"] = context
+    logging.info("Generating answer...")
+    answer = answer_plugin["getAnswer"].invoke(variables=answer_vars)
+    answer = answer.result.strip()
+    messages.append({'role': 'assistant', 'content': answer})
+    logging.info(f"Assistant: {answer}")
+
+
 # Create Flask app
 app = Flask(__name__)
 
@@ -59,49 +99,23 @@ def chat():
     logging.info(f"User: {ask}")
 
     # Detect user intent
-    logging.info("Detecting intent...")
-    intent_vars = sk.ContextVariables()
-    intent_vars["input"] = ask
-    intent_vars["options"] = "AccountQuery, Other"
-    intent_vars["history"] = get_message_history(messages)
-    intent = orchestrator_plugin["getIntent"].invoke(variables=intent_vars)
-    intent_result = intent.result.strip()
-    logging.info(f"Intent: {intent_result}")
+    intent_result = detect_intent(ask)
 
     if intent_result == "AccountQuery":
 
         # Extract organization name to use as search query
-        query_vars = sk.ContextVariables()
-        query_vars["input"] = ask
-        query_vars["history"] = get_message_history(messages)
-        query = orchestrator_plugin["getQuery"].invoke(variables=query_vars)
-        query_clean = query.result.replace("<|im_end|>", "").strip()
-        logging.info(f"Searching accounts for '{query_clean}'...")
+        query = extract_account(ask)
 
         # Search for the account
-        search_result = search_plugin["getAccount"].invoke(query_clean)
-        logging.info(f"Search result: {search_result.result}")
-
-        # Set up context variables
-        answer_vars = sk.ContextVariables()
-        answer_vars["input"] = ask
-        answer_vars["context"] = search_result.result
+        search_result = search_accounts(query)
 
         # Generate answer
-        logging.info("Generating answer...")
-        answer = answer_plugin["getAnswer"].invoke(variables=answer_vars)
-        answer = answer.result.strip()
-        messages.append({'role': 'assistant', 'content': answer})
-        logging.info(f"Assistant: {answer}")
+        answer = generate_answer(ask, search_result)
 
     else:
         
         # Generate answer
-        logging.info("Generating answer...")
-        answer = answer_plugin["getAnswer"].invoke(ask)
-        answer = answer.result.strip()
-        messages.append({'role': 'assistant', 'content': answer})
-        logging.info(f"Assistant: {answer}")
+        answer = generate_answer(ask)
 
     return render_template('index.html', messages=messages)
 
