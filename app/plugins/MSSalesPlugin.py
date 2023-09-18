@@ -23,7 +23,7 @@ class MSSalesPlugin:
         input_description="The account name",
     )
     def get_account_id(self, account_name: str) -> str:
-        url = "https://microsoftsales.api.crm.dynamics.com/api/data/v9.1/accounts"
+        url = "https://<ORG NAME>.api.crm.dynamics.com/api/data/v9.1/accounts"
         country = "Denmark"
 
         # set the query parameters to filter the results for a specific account
@@ -55,7 +55,7 @@ class MSSalesPlugin:
         input_description="The account ID",
     )
     def get_opportunities_for_account(self, account_id: str) -> str:
-        url = "https://microsoftsales.api.crm.dynamics.com/api/data/v9.1/opportunities"
+        url = "https://<ORG NAME>.api.crm.dynamics.com/api/data/v9.1/opportunities"
         cutoff_date = "2023-01-01T00:00:00Z"
 
         query_params = {

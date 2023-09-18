@@ -3,7 +3,7 @@ from azure.keyvault.secrets import SecretClient
 
 class KeyVault:
     def __init__(self):
-        self.vault_url = 'https://aidemo-kv.vault.azure.net/'
+        self.vault_url = '<KEYVAULT URI>'
         self.credential = DefaultAzureCredential(
             exclude_environment_credential=True,
             exclude_managed_identity_credential=True,

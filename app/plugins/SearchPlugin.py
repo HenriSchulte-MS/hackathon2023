@@ -12,7 +12,7 @@ class SearchPlugin:
     search_endpoint = keyvault.get_secret(SEARCH_ENDPOINT_NAME)
     search_key = keyvault.get_secret(SEARCH_KEY_NAME)
 
-    # Create Cognitive Search client with configuration from .env file
+    # Create Cognitive Search client
     search_client = SearchClient(
         endpoint=search_endpoint,
         index_name='mal-idx',
